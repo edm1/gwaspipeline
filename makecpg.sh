@@ -19,10 +19,8 @@
 #  Written by Giulio Genovese <giulio.genovese@gmail.com>
 ###
 
-set -e -o pipefail
-
 # install basic tools (Debian specific)
-sudo apt-get install bedtools gzip samtools tabix wget
+#sudo apt-get install bedtools gzip samtools tabix wget
 
 # preparation steps
 mkdir -p ~/res/

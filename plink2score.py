@@ -21,13 +21,7 @@
 
 import argparse, os, sys, pandas as pd, numpy as np, functools
 from subprocess import call
-
-try:
-  import pandas.rpy.common as com, rpy2
-except ImportError:
-  sys.stderr.write('You need to install the rpy2 module first\n')
-  sys.stderr.write('(run this in your terminal: "python3 -m pip install rpy2" or "python3 -m pip install --user rpy2")\n')
-  exit(2)
+import pandas.rpy.common as com, rpy2
 
 parser = argparse.ArgumentParser(description = 'plink2score.py: Run plink software to compute polygenic scores (Oct 3rd 2016)', add_help = False, usage = 'plink2score.py [options]')
 parser.add_argument('--bfile', metavar = '{prefix}', type = str, help = 'Specify .bed + .bim + .fam prefix')
@@ -40,10 +34,10 @@ parser.add_argument('--keep', metavar = '[filename]', type = str, help = 'Exclud
 parser.add_argument('--remove', metavar = '[filename]', type = str, help = 'Exclude all samples named in the file.')
 parser.add_argument('--dosage', metavar = '[filename]', type = str, nargs = '+', help = 'a master list with one entry per line (see plink --help --dosage)')
 parser.add_argument('--map', metavar = '[filename]', type = str, help = 'Specify full name of .map file')
-parser.add_argument('--score', metavar = '[filename]', type = str, required = True, nargs = '+', help = 'Linear scoring system (see plink --help --score)')
+parser.add_argument('--score', metavar = '[filename]', type = str, nargs = '+', help = 'Linear scoring system (see plink --help --score)')
 parser.add_argument('--q-score-range', metavar = '[range file]', type = str, help = 'p-value ranges (see plink --help --score)')
 parser.add_argument('--covar', metavar = '[filename]', type = str, help = 'File with covariates to regress polygenic scores')
-parser.add_argument('--covar-name', metavar = '[filename]', type = str, default = 'PC1,PC2,PC3,PC4,PC5' , help = 'Use column in the covariate file with the given name')
+parser.add_argument('--covar-names', metavar = '[filename]', type = str, default = 'PC1,PC2,PC3,PC4,PC5' , help = 'Use column in the covariate file with the given name')
 parser.add_argument('--pop', metavar = '[filename]', type = str, help = 'Use table to include samples labels')
 parser.add_argument('--adj-pop', metavar = '[pop]', type = str, help = 'Label group to use to perform the adjustments')
 parser.add_argument('--debug', metavar = '[prefix]', type = str, default = 'plink', help = 'Specify debugging file with polygenic scores before covariate adjusting')
@@ -70,7 +64,7 @@ if args.out:
 
 if args.covar:
   df_covar = pd.read_csv(args.covar, delim_whitespace = True, dtype = {'FID':np.object, 'IID':np.object})
-  pc_names = args.covar_name.split(',')
+  pc_names = args.covar_names.split(',')
   if any([x not in df_covar.columns for x in pc_names]):
     raise Exception('plink2score.py: missing covariate')
 

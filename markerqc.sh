@@ -25,8 +25,6 @@
 # optional file with list of samples to be removed
 # optional minimum frequency of missingness allowed (I use .02 for Illumina, and .05 for Affymetrix)
 
-set -e -o pipefail
-
 if [ $# -lt 2 ]; then
   echo "About:   Perform marker quality control using plink (Oct 3rd 2016)"
   echo "Usage:   markerqc.sh <input prefix> <output prefix> [remove range] [lmiss threshold]"

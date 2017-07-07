@@ -19,8 +19,6 @@
 #  Written by Giulio Genovese <giulio.genovese@gmail.com>
 ###
 
-set -e -o pipefail
-
 if [ $# -lt 3 ]; then
   echo "About:   Create variant sets from annotations (Oct 3rd 2016)"
   echo "Usage:   annot2set.sh <input VCF> <output prefix> <respath>"
@@ -60,7 +58,7 @@ bcftools query -i "CPG==1" -f "%CHROM:%POS:%REF:%ALT\n" $vcf | sort | uniq > $ou
 
 bcftools query -i "EXACAC>0" -f "%CHROM:%POS:%REF:%ALT\n" $vcf | sort | uniq > $out.exac
 
-bcftools query -i "HRCAC>0" -f "%CHROM:%POS:%REF:%ALT\n" $vcf | sort | uniq > $out.hrc
+#bcftools query -i "HRCAC>0" -f "%CHROM:%POS:%REF:%ALT\n" $vcf | sort | uniq > $out.hrc
 
 bcftools query -i "NONPSYCHAC>0" -f "%CHROM:%POS:%REF:%ALT\n" $vcf | sort | uniq > $out.nonpsych
 
@@ -118,7 +116,7 @@ $snpsift filter "(dbNSFP_${pred}_pred =~ '[HM]')" $vcf | bcftools query -f "%CHR
 ## KNOWN GENES RELATED DEFINITIONS                                       ##
 ###########################################################################
 
-gzip -cd $known | awk -F"\t" '{split($9, a, ","); split($10, b, ","); for (i=1; i<length(a); i++) {from=$6>a[i]?$6:a[i]; 
+gzip -cd $known | awk -F"\t" '{split($9, a, ","); split($10, b, ","); for (i=1; i<length(a); i++) {from=$6>a[i]?$6:a[i];
   to=$7<b[i]?$7:b[i]; if (to>from) print $2"\t"from-2"\t"to+2}}' | sed 's/^chr//' |
   bedtools sort | bedtools merge | bedtools intersect -a <(bcftools query -f "%CHROM\t%POS\t%POS\t%CHROM:%POS:%REF:%ALT\n" $vcf) -b - |
   cut -f4 | sort | uniq | join - <(cat $out.{high,moderate,low} | sort | uniq) > $out.known

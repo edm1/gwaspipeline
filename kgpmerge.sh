@@ -25,8 +25,6 @@
 # optional file with list of markers to be extracted (usually a prune.in file)
 # optional file with list of samples to be removed
 
-set -e -o pipefail
-
 if [ $# -lt 3 ]; then
   echo "About:   Merge plink dataset with 1000 Genomes project phase 1 dataset (Oct 3rd 2016)"
   echo "Usage:   kgpmerge.sh <input prefix> <output prefix> <kgp prefix> [extract range] [remove range]"

@@ -110,7 +110,7 @@ plink --bfile $pfx.urv \
 # generate covariate file
 awk 'NR==FNR {x[$6]++} NR>FNR {print $2"\t"x[$2]+0}' $pfx.urv.rlist $pfx.urv.fam |
   sort -t$'\t' -k1,1 > out/$pfx.urv.count.tsv
-cut -f2,3,5- kgp/$pfx.lite.all.pca | sort -t$'\t' -k1,1 |
+cut -f2,3,5- kgp/$pfx.lite.kgp.pc.tsv | sort -t$'\t' -k1,1 |
   join -t$'\t' - <(echo -e "IID\tURV"; cat out/$pfx.urv.count.tsv) |
   join -a1 -t$'\t' - <(echo -e "IID\tKIT"; cat $kit) |
   join -a1 -t$'\t' - <(echo -e "IID\tBIRTH"; cat $birth) |
@@ -159,7 +159,7 @@ for grp in $(cut -f2 $batch | sort | uniq); do
   awk -F"\t" -v grp="$grp" '$2==grp {print "0",$1,"2"} $2!=grp {print "0",$1,"1"}' $batch |
     plink --bfile $pfx \
     --pheno /dev/stdin \
-    --covar kgp/$pfx.lite.all.pca \
+    --covar kgp/$pfx.lite.kgp.pc.tsv \
     --covar-name $(echo PC{1..20}|tr ' ' ',') \
     --logistic sex \
     --out out/$pfx.$grp
@@ -178,7 +178,7 @@ awk -F"\t" '{print "0",$1,$2}' $pheno |
   plink --bfile $pfx \
   --remove out/$pfx.rm \
   --pheno /dev/stdin \
-  --covar kgp/$pfx.lite.all.pca \
+  --covar kgp/$pfx.lite.kgp.pc.tsv \
   --covar-name $(echo PC{1..5}|tr ' ' ',') \
   --logistic sex \
   --out out/$pfx

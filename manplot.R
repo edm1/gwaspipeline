@@ -38,9 +38,9 @@ if (regexpr('.pdf$', output)>0) {
 if (args[1]=='-') {
   df <- read.table(file('stdin'), header=TRUE)
 } else {
-  df <- read.table(args[1], header=TRUE)
+  df <- read.table(args[1], header=TRUE, sep="\t")
 }
-if(!all(names(df) %in% c('CHR', 'BP', 'P'))) { stop('Missing headers in the plink assoc file') }
+if(!all(c('CHR', 'BP', 'P') %in% names(df))) { stop('Missing headers in the plink assoc file') }
 
 # this coordinates are for GRCh37/hg19 human genome reference
 chrlen <- c(249251621, 243199373, 198022430, 191154276, 180915260, 171115067,

@@ -23,8 +23,6 @@
 # requires plink prefix of the input dataset
 # requires plink prefix of the output dataset
 
-set -e -o pipefail
-
 if [ $# -lt 3 ]; then
   echo "About:   generate a lite version of a plink dataset (Oct 3rd 2016)"
   echo "Usage:   plink2lite.sh <input prefix> <output prefix> <respath> [--opt opt]"

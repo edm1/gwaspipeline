@@ -29,8 +29,6 @@
 # outputs dups.rm file with list of duplicates to remove
 # outputs rels.rm file with list of closely related samples to remove
 
-set -e -o pipefail
-
 if [ $# -lt 2 ]; then
   echo "About:   Perform sample quality control using plink (Oct 3rd 2016)"
   echo "Usage:   sampleqc.sh <input prefix> <output prefix> [exclude range] [imiss threshold]"

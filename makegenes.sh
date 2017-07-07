@@ -26,12 +26,12 @@ mkdir -p ~/res/genes/
 wget -NP ~/res/ http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/{knownGene,ensGene,ensemblToGeneName}.txt.gz
 
 # download dictionary for mouse genes
-wget -O- ftp://ftp.informatics.jax.org/downloads/reports/MGI_Gene_Model_Coord.rpt |
+wget -O- ftp://ftp.informatics.jax.org/pub/reports/MGI_Gene_Model_Coord.rpt |
   tail -n+2 | awk -F"\t" '{print $3"\t"$1}' |
   sort -t $'\t' -k1,1 > ~/res/genes/symbol2mgi.txt
 
 # download dictionary for mouse genes
-wget -O- ftp://ftp.informatics.jax.org/downloads/reports/MGI_Gene_Model_Coord.rpt |
+wget -O- ftp://ftp.informatics.jax.org/pub/reports/MGI_Gene_Model_Coord.rpt |
   tail -n+2 | awk -F"\t" '$11!="null" {print $3"\t"$11}' |
   sort -t $'\t' -k1,1 > ~/res/genes/symbol2ensmusg.txt
 
@@ -62,7 +62,7 @@ wget -O- "http://www.genenames.org/cgi-bin/download?col=gd_prev_sym&col=gd_alias
   join -t $'\t' -a1 -v1 - ~/res/genes/ens.txt > ~/res/genes/homo2symbol.txt
 
 # download relationship for withdrawn mouse genes
-wget -O- "ftp://ftp.informatics.jax.org/downloads/reports/MRK_List1.rpt" |
+wget -O- "ftp://ftp.informatics.jax.org/pub/reports/MRK_List1.rpt" |
   awk -F"\t" '$9~"^withdrawn, = " {print $7"\t"substr($9,14)}' |
   sort -t $'\t' -k1,1 > ~/res/genes/mus2symbol.txt
 
@@ -110,13 +110,13 @@ xlsx2csv -s 5 -d tab /tmp/mmc3.xlsx |
 wget -P /tmp http://www.nature.com/ng/journal/v46/n9/extref/ng.3050-S3.xls
 localc --nologo --convert-to xlsx --outdir /tmp /tmp/ng.3050-S3.xls
 xlsx2csv -s 3 -d tab /tmp/ng.3050-S3.xlsx | tail -n+2 | cut -f2 | sort |
-  join -t $'\t' -a1 - ~/res/genes/homo2symbol.txt |
+  join -t $'\t' -a1 - homo2symbol.txt |
   cut -f2 | sort | uniq > ~/res/genes/constrained.txt
 
 # haplo-insufficient gene list (Lek et al. 2015)
 wget -P /tmp ftp://ftp.broadinstitute.org/pub/ExAC_release/release0.3/functional_gene_constraint/fordist_cleaned_nonpsych_z_pli_rec_null_data.txt
 tail -n+2 /tmp/fordist_cleaned_nonpsych_z_pli_rec_null_data.txt | awk -F"\t" '$20>.9 {print $2}' |
-  sort | join -t $'\t' -a1 - ~/res/genes/homo2symbol.txt |
+  sort | join -t $'\t' -a1 - homo2symbol.txt |
   cut -f2 | sort | uniq > ~/res/genes/pLI09.txt
 
 # FMRP gene list (Darnell et al. 2011)
@@ -157,7 +157,7 @@ for cat in pre vesicle preactivezone post; do
   localc --nologo --convert-to xlsx --outdir /tmp /tmp/cat_$cat.xls
 done
 (for cat in pre vesicle preactivezone post; do xlsx2csv -d tab /tmp/cat_$cat.xlsx | tail -n+2; done) |
-  cut -f2 | sort | join -t $'\t' -a1 - ~/res/genes/homo2symbol.txt |
+  cut -f2 | sort | join -t $'\t' -a1 - homo2symbol.txt |
   cut -f2 | sort | uniq > ~/res/genes/synaptome.txt
 
 # PSD and PSD-95 gene lists (Bayes et al. 2011)
@@ -167,7 +167,7 @@ for i in 49 69; do
   wget -O- http://www.genes2cognition.org/db/GeneList/L000000$i |
     grep "<td><em>.*</em></td>" |
     sed 's/^ *<td><em>\(.*\)<\/em><\/td> *$/\1/g' |
-    sort | join -t $'\t' -a1 - ~/res/genes/homo2symbol.txt |
+    sort | join -t $'\t' -a1 - homo2symbol.txt |
     cut -f2 | sort | uniq > ~/res/genes/$name.txt
 done
 
@@ -175,7 +175,7 @@ done
 wget -P /tmp http://www.nature.com/mp/journal/v17/n2/extref/mp2011154x1.pdf
 pdftk /tmp/mp2011154x1.pdf cat 39 40 output /dev/stdout | pdftotext - - |
   grep ^[A-Z][A-Z0-9]*$ | sort |
-  join -t $'\t' -a1 - ~/res/genes/homo2symbol.txt |
+  join -t $'\t' -a1 - homo2symbol.txt |
   cut -f2 | sort | uniq > ~/res/genes/nmdarc.txt
 
 # MIR-137 gene list (Betel et al. 2010)
@@ -211,7 +211,7 @@ unzip -p /tmp/scz2.regions.zip scz2.anneal.108.txt |
 # X-linked intellectual disability gene lists
 for chr in {1..22} X Y; do
   for i in {0..7}; do
-    wget -O- --user-agent="M" "http://omim.org/geneMap/$chr?start=$((200*i+1))&limit=$((200*(i+1)))&format=tsv" |
+    wget -O- --user-agent="M" "http://omim.org/geneMap/$chr?start=$((200*i+1))&limit=$((200*(i+1)))&format=tab" |
       tail -n+5 | head -n-12
   done
 done > /tmp/omim.txt
@@ -230,7 +230,7 @@ cat ~/res/genes/xlid.{omim,gcc,chicago}.txt | sort | uniq > ~/res/genes/xlid.txt
 wget -P /tmp http://europepmc.org/articles/PMC4053723/bin/gb-2013-14-11-r122-S7.xlsx
 xlsx2csv -d tab /tmp/gb-2013-14-11-r122-S7.xlsx |
   awk -F"\t" '$5~"escape" {print $1}' | sort |
-  join -t $'\t' -a1 - ~/res/genes/homo2symbol.txt | cut -f2 |
+  join -t $'\t' -a1 - homo2symbol.txt | cut -f2 |
   sort | uniq > ~/res/genes/x.escape.txt
 
 # Developmental disorder gene list (McRae et al. 2016)
@@ -243,12 +243,12 @@ for disease in AUT CHD EPI ID SCZ; do
   tail -n+2 /tmp/annotated.LIT_de_novos.txt | cut -f7,10,12 |
     awk '$2~"codon" || $2=="frameshift" || $2=="missense" || $2=="nonsense" || $2=="readthrough" || $2~"splice" || $2=="start-lost"' |
     grep ^$disease | cut -f3 | tr ',' '\n' | sort |
-    join -t $'\t' -a1 - ~/res/genes/homo2symbol.txt |
+    join -t $'\t' -a1 - homo2symbol.txt |
     cut -f2 | sort | uniq > ~/res/genes/denovo.${disease,,}.txt
 done
 
 # CNV denovo gene lists (Kirov et al. 2012)
-wget -P /tmp http://www.nature.com/neuro/journal/v19/n11/extref/nn.4402-S5.xlsx
+wget -P /tmp http://www.nature.com/neuro/journal/vaop/ncurrent/extref/nn.4402-S5.xlsx
 for class in loss gain; do
   for disease in ASD BD SCZ; do
     xlsx2csv -d tab /tmp/nn.4402-S5.xlsx |

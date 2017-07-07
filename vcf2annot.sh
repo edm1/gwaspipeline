@@ -23,8 +23,6 @@
 # requires input VCF file as first parameter (- for standard input)
 # requires output VCF file prefix as second paramter
 
-set -e -o pipefail
-
 if [ $# -lt 4 ]; then
   echo "About:   Annotate a VCF file (Oct 3rd 2016)"
   echo "Usage:   vcf2annot.sh <input VCF> <output prefix> <ref> <respath>"
@@ -36,7 +34,7 @@ out="$2"
 ref="$3"
 res="$4"
 
-# makes sure the ouput directory exists                                                                                                 
+# makes sure the ouput directory exists
 dir=$(dirname $out)
 mkdir -p $dir
 
@@ -45,9 +43,10 @@ cpg="$res/cpg.vcf.gz"
 exac="$res/ExAC.r0.3.sites.vep.norm.vcf.gz"
 hrc="$res/HRC.r1-1.GRCh37.wgs.mac5.sites.vcf.gz"
 nonpsych="$res/ExAC.r0.3.nonpsych.sites.norm.vcf.gz"
-dbnsfp="$res/dbNSFP2.9.txt.gz"
+dbnsfp="$res/dbNSFP.txt.gz"
 
-vcf_fields="CHROM POS REF ALT QUAL FILTER AC AN ANN LOF NMD OM KGPhase3 RS CPG EXACAC HRCAC NONPSYCHAC NOPASS ANCLOF"
+vcf_fields="CHROM POS REF ALT QUAL FILTER AC AN ANN LOF NMD OM KGPhase3 RS CPG EXACAC NONPSYCHAC NOPASS ANCLOF"
+#vcf_fields="CHROM POS REF ALT QUAL FILTER AC AN ANN LOF NMD OM KGPhase3 RS CPG EXACAC HRCAC NONPSYCHAC NOPASS ANCLOF"
 dbnsfp_fields="$(echo {SIFT,Polyphen2_H{DIV,VAR},LRT,Mutation{Taste,Assesso}r,FATHMM,PROVEAN}_pred clinvar_{clnsig,trait} COSMIC_{ID,CNT})"
 header="$(echo "$vcf_fields $dbnsfp_fields" | sed 's/_pred//g' | tr ' ' '\t')"
 format="$(echo "$vcf_fields $(echo $dbnsfp_fields | sed 's/\(^\| \)/\1dbNSFP_/g')" | sed 's/\(^\| \)/\1%/g' | tr ' ' '\t')\n"
@@ -64,12 +63,13 @@ fi |
   java -Xmx2g -jar $res/SnpSift.jar annotate -noId -info RS,PM,KGPhase3,OM $dbsnp - |
   java -Xmx2g -jar $res/SnpSift.jar annotate -exists CPG -noInfo $cpg - |
   java -Xmx2g -jar $res/SnpSift.jar annotate -name EXAC -info AC $exac - |
-  java -Xmx2g -jar $res/SnpSift.jar annotate -name HRC -info AC $hrc - |
   java -Xmx2g -jar $res/SnpSift.jar annotate -name NONPSYCH -info AC $nonpsych - |
   java -Xmx2g -jar $res/SnpSift.jar dbnsfp -v -f $(echo $dbnsfp_fields|tr ' ' ',') -db $dbnsfp - |
   grep -v "^##bcftools\|^##SnpEff\|^##SnpSift" |
   bgzip > $out.annot.vcf.gz &&
   tabix -f $out.annot.vcf.gz
+
+#java -Xmx2g -jar $res/SnpSift.jar annotate -name HRC -info AC $hrc - |
 
 # cleanup
 if [ -f snpEff_summary.html ]; then rm snpEff_summary.html; fi
